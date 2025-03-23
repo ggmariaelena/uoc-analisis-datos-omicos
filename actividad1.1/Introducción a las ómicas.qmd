@@ -1,0 +1,52 @@
+---
+title: "Introducción a las ómicas"
+author: "María Elena Grela Gomes"
+format: pdf
+editor: visual
+---
+
+### 1. Leer un dataset del *Gene Expression Omnibus*
+
+```{r}
+if (!require(GEOquery)) {
+  BiocManager::install("GEOquery")
+}
+
+require(GEOquery)
+gse <- getGEO("GSE5668", GSEMatrix=TRUE, AnnotGPL=TRUE)
+```
+
+Como el formato requerido de GEO es una serie, la función **getGeo()** va a devolver una lista, de la cual cada elemento es un objeto de la clase *expressionSet*. Extraemos el primer elemento y mostramos las primeras líneas de los datos de expresión.
+
+```{r}
+eSetFromGEO <- gse[[1]]
+head(exprs(eSetFromGEO))
+```
+
+Exploramos la infomación existente de las covariables experimentales.
+
+```{r}
+colnames(pData(eSetFromGEO))
+```
+
+### 2. Determinar la estructura de los datos y el diseño del estudio
+
+#### Estructura de los datos
+
+```{r}
+gds <- getGEO("GDS2300")
+eSetFromGEO2 <- GDS2eSet(gds,do.log2=FALSE)
+dim(exprs(eSetFromGEO2))
+```
+
+La matriz de los datos de expresión tiene 45.101 filas y 6 columnas.
+
+#### Diseño del estudio
+
+Utilizando **experimentData()** sobre el *GEO DataSet* convertido en *expressionSet* podemos obtener información sobre el estudio.
+
+```{r}
+experimentData(eSetFromGEO2)
+```
+
+Con esta información, podemos saber que este estudio buscaba comparar la expresión génica entre dos estadíos de ovocitos de ratón: ovocitos en vesícula germinal y ovocitos en metafase II. Para ello, usaron la plataforma GPL1261, que es un microarray de síntesis de oligonucleótidos *in situ* diseñado especialmente para *Mus musculus,* y evaluaron 6 muestras.
